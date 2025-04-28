@@ -1,20 +1,9 @@
+// src/types/navigation.ts
 export type RootStackParamList = {
     Splash: undefined;
     Login: undefined;
     Register: undefined;
     ForgotPassword: undefined;
     Dashboard: undefined;
-    TaskList: undefined;
-    TaskDetail: { taskId: string };
-    CreateTask: undefined;
-    EditTask: { taskId: string };
-    Profile: undefined;
-    ProjectList: undefined;
-    ProjectDetail: { projectId: string };
-    TeamList: undefined;
-    TeamDetail: { teamId: string };
-    Analytics: undefined;
-    Settings: undefined;
-    Notifications: undefined;
-    Calendar: undefined;
+    // Add other routes as needed
 };
