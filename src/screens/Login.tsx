@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { TextInput, Button, Text, ActivityIndicator } from 'react-native-paper';
+import { TextInput, Button, Text, ActivityIndicator, Checkbox } from 'react-native-paper';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { useDispatch } from 'react-redux';
@@ -8,6 +8,7 @@ import { login } from '../store/slices/authSlice';
 import { authService } from '../services/authService';
 import { API_URL, ERROR_MESSAGES } from '../config';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -15,13 +16,13 @@ type Props = {
     navigation: LoginScreenNavigationProp;
 };
 
-
-
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -36,6 +37,24 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             }
         };
         testConnection();
+
+        // Check for saved credentials
+        const loadSavedCredentials = async () => {
+            try {
+                const savedEmail = await AsyncStorage.getItem('savedEmail');
+                const savedPassword = await AsyncStorage.getItem('savedPassword');
+
+                if (savedEmail && savedPassword) {
+                    setEmail(savedEmail);
+                    setPassword(savedPassword);
+                    setRememberMe(true);
+                }
+            } catch (error) {
+                console.error('Error loading saved credentials:', error);
+            }
+        };
+
+        loadSavedCredentials();
     }, []);
 
     const handleLogin = async () => {
@@ -51,6 +70,16 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
             // Call the authService to login
             const userData = await authService.login(email, password);
+
+            // Save credentials if remember me is checked
+            if (rememberMe) {
+                await AsyncStorage.setItem('savedEmail', email);
+                await AsyncStorage.setItem('savedPassword', password);
+            } else {
+                // Clear saved credentials if remember me is unchecked
+                await AsyncStorage.removeItem('savedEmail');
+                await AsyncStorage.removeItem('savedPassword');
+            }
 
             // Store the auth data in Redux
             dispatch(login(userData));
@@ -71,65 +100,77 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.logoContainer}>
-                {/* <Image
-                    source={require('../../assets/logo.png')}
-                    style={styles.logo}
-                    resizeMode="contain"
-                /> */}
-                <Text style={styles.logoText}>TaskMaster Pro</Text>
-            </View>
+            <Text style={styles.titleText}>Login</Text>
 
             <View style={styles.formContainer}>
-                <TextInput
-                    label="Email"
-                    value={email}
-                    onChangeText={setEmail}
-                    mode="outlined"
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                    style={styles.input}
-                />
+                <Text style={styles.inputLabel}>Email Address</Text>
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        value={email}
+                        onChangeText={setEmail}
+                        mode="flat"
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                        style={styles.input}
+                        placeholder="Email address"
+                        underlineColor="transparent"
+                        left={<TextInput.Icon icon="account" color="#666" />}
+                    />
+                </View>
 
-                <TextInput
-                    label="Password"
-                    value={password}
-                    onChangeText={setPassword}
-                    mode="outlined"
-                    secureTextEntry
-                    style={styles.input}
-                />
+                <Text style={styles.inputLabel}>Password</Text>
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        value={password}
+                        onChangeText={setPassword}
+                        mode="flat"
+                        secureTextEntry={!passwordVisible}
+                        style={styles.input}
+                        placeholder="Password"
+                        underlineColor="transparent"
+                        left={<TextInput.Icon icon="lock" color="#666" />}
+                        right={
+                            <TextInput.Icon
+                                icon={passwordVisible ? "eye-off" : "eye"}
+                                color="#666"
+                                onPress={() => setPasswordVisible(!passwordVisible)}
+                            />
+                        }
+                    />
+                </View>
 
                 {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+                <View style={styles.rememberForgotContainer}>
+                    <View style={styles.rememberMeContainer}>
+                        <Checkbox
+                            status={rememberMe ? 'checked' : 'indeterminate'}
+                            onPress={() => setRememberMe(!rememberMe)}
+                            color="#6039FF"
+                        />
+                        <Text style={styles.rememberMeText}>Remember me</Text>
+                    </View>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('ForgotPassword')}
+                    >
+                        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                    </TouchableOpacity>
+                </View>
 
                 <Button
                     mode="contained"
                     onPress={handleLogin}
-                    style={styles.button}
+                    style={styles.loginButton}
+                    labelStyle={styles.loginButtonText}
                     disabled={loading}
                 >
-                    {loading ? <ActivityIndicator color="#fff" /> : 'Sign In'}
+                    {loading ? <ActivityIndicator color="#fff" /> : 'Log In'}
                 </Button>
 
-                <TouchableOpacity
-                    onPress={() => navigation.navigate('ForgotPassword')}
-                    style={styles.forgotPassword}
-                >
-                    <Text>Forgot password?</Text>
-                </TouchableOpacity>
-
-                {/* <View style={styles.divider}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>OR</Text>
-                    <View style={styles.dividerLine} />
-                </View> */}
-
-
-
                 <View style={styles.registerContainer}>
-                    <Text>Don't have an account? </Text>
+                    <Text style={styles.noAccountText}>Don't have an account? </Text>
                     <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                        <Text style={styles.registerText}>Register</Text>
+                        <Text style={styles.signUpText}>Sign Up</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -140,85 +181,83 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
-        backgroundColor: '#f5f5f5',
+        padding: 20,
+        backgroundColor: '#fff',
     },
-    logoContainer: {
-        alignItems: 'center',
-        marginTop: 40,
-        marginBottom: 30,
-    },
-    logo: {
-        width: 80,
-        height: 80,
-    },
-    logoText: {
-        fontSize: 24,
+    titleText: {
+        fontSize: 42,
         fontWeight: 'bold',
-        marginTop: 10,
-        color: '#3498db',
+        color: '#6039FF',
+        marginTop: 40,
+        marginBottom: 40,
     },
     formContainer: {
+        width: '100%',
+    },
+    inputLabel: {
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 8,
+    },
+    inputContainer: {
+        marginBottom: 24,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 4,
         backgroundColor: '#fff',
-        padding: 20,
-        borderRadius: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        elevation: 5,
     },
     input: {
-        marginBottom: 16,
+        backgroundColor: 'transparent',
+        height: 56,
     },
-    button: {
-        marginTop: 10,
-        paddingVertical: 8,
+    rememberForgotContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 24,
+
+    },
+    rememberMeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+
+    },
+    rememberMeText: {
+        marginLeft: 4,
+        fontSize: 14,
+        color: '#333',
+    },
+    forgotPasswordText: {
+        color: '#6039FF',
+        fontSize: 16,
+    },
+    loginButton: {
+        backgroundColor: '#6039FF',
+        height: 56,
+        justifyContent: 'center',
+        borderRadius: 4,
+        marginBottom: 24,
+    },
+    loginButtonText: {
+        fontSize: 18,
+        fontWeight: 'bold',
     },
     errorText: {
         color: '#e74c3c',
         marginBottom: 10,
     },
-    forgotPassword: {
-        alignSelf: 'center',
-        marginTop: 16,
-        marginBottom: 16,
-    },
-    divider: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 20,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: '#e0e0e0',
-    },
-    dividerText: {
-        marginHorizontal: 10,
-        color: '#999',
-    },
-    socialButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    socialButton: {
-        flex: 1,
-        marginHorizontal: 5,
-    },
-    googleButton: {
-        borderColor: '#4285F4',
-    },
-    githubButton: {
-        borderColor: '#333',
-    },
     registerContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 20,
+        marginTop: 24,
     },
-    registerText: {
-        color: '#3498db',
+    noAccountText: {
+        fontSize: 16,
+        color: '#333',
+    },
+    signUpText: {
+        fontSize: 16,
+        color: '#6039FF',
         fontWeight: 'bold',
     },
 });
