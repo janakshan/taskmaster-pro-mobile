@@ -1,14 +1,56 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, StatusBar, SafeAreaView } from 'react-native';
-import { Searchbar, Card, ProgressBar, Avatar, IconButton } from 'react-native-paper';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView } from 'react-native';
+import { Searchbar, Card, ProgressBar, Avatar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-export default function HomeScreen() {
-    const navigation = useNavigation();
+// Define types for our data structures
+type TeamMember = {
+    id: number;
+    avatar: string;
+};
+
+type Task = {
+    id: number;
+    title: string;
+    completed: boolean;
+};
+
+type CompletedTask = {
+    id: number;
+    title: string;
+    teamMembers: TeamMember[];
+    progress: number;
+    color: string;
+};
+
+type Project = {
+    id: number;
+    title: string;
+    teamMembers: TeamMember[];
+    dueDate: string;
+    progress: number;
+    description: string;
+    totalTasks: number;
+    completedTasks: number;
+    tasks: Task[];
+};
+
+// Define the navigation parameter list
+type RootStackParamList = {
+    Home: undefined;
+    ProjectDetail: { project: Project };
+};
+
+// Type for navigation prop
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+
+const HomeScreen: React.FC = () => {
+    const navigation = useNavigation<HomeScreenNavigationProp>();
 
     // Mock data for completed tasks
-    const completedTasks = [
+    const completedTasks: CompletedTask[] = [
         {
             id: 1,
             title: 'Real Estate Website Design',
@@ -51,7 +93,7 @@ export default function HomeScreen() {
     ];
 
     // Mock data for ongoing projects
-    const ongoingProjects = [
+    const ongoingProjects: Project[] = [
         {
             id: 1,
             title: 'Mobile App Wireframe',
@@ -118,7 +160,7 @@ export default function HomeScreen() {
     ];
 
     // Render team members avatars with overlap effect
-    const renderTeamMembers = (members) => {
+    const renderTeamMembers = (members: TeamMember[]) => {
         const visibleMembers = members.slice(0, 4); // Show only first 4 members
         const remainingCount = members.length - 4;
 
@@ -145,7 +187,7 @@ export default function HomeScreen() {
     };
 
     // Render a progress circle for ongoing projects
-    const renderProgressCircle = (progress) => {
+    const renderProgressCircle = (progress: number) => {
         const percentage = Math.round(progress * 100);
         const circumference = 2 * Math.PI * 30; // Circle with radius 30
         const strokeDashoffset = circumference * (1 - progress);
@@ -172,7 +214,7 @@ export default function HomeScreen() {
     };
 
     // Handle project card press - navigate to project details
-    const handleProjectPress = (project) => {
+    const handleProjectPress = (project: Project) => {
         navigation.navigate('ProjectDetail', { project });
     };
 
@@ -199,6 +241,8 @@ export default function HomeScreen() {
                     style={styles.searchBar}
                     iconColor="#757575"
                     inputStyle={styles.searchInput}
+                    onChangeText={() => { }}
+                    value=""
                 />
                 <TouchableOpacity style={styles.filterButton}>
                     <Icon name="sliders" size={20} color="#ffffff" />
@@ -282,7 +326,7 @@ export default function HomeScreen() {
             </ScrollView>
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -496,3 +540,5 @@ const styles = StyleSheet.create({
         color: '#6c5ce7',
     }
 });
+
+export default HomeScreen;
