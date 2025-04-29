@@ -1,17 +1,21 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/navigation';
-import SplashScreen from '../screens/SplashScreen';
-import LoginScreen from '../screens/Login';
 
 // Import screens
-// import SplashScreen from '../screens/SplashScreen';
-// import LoginScreen from '../screens/Login';
+import SplashScreen from '../screens/SplashScreen';
+import LoginScreen from '../screens/Login';
 import DashboardScreen from '../screens/DashboardScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import ProjectDetailScreen from '../screens/HomeScreen/ProjectDetailsScreen';
 
-const ForgotPasswordScreen = () => null;
-// Add other placeholder screens as needed
+// Define the root stack parameter list type
+export type RootStackParamList = {
+    Splash: undefined;
+    Login: undefined;
+    Register: undefined;
+    Dashboard: undefined;
+    ProjectDetail: { project: any }; // Replace 'any' with your Project type
+};
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -28,10 +32,10 @@ const AppNavigator: React.FC = () => {
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
-            {/* <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} /> */}
 
             {/* Main App Flow */}
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
+            <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
 
             {/* Add other screens as you implement them */}
         </Stack.Navigator>

@@ -1,13 +1,11 @@
-// App.tsx
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { Provider as ReduxProvider } from 'react-redux';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { StatusBar } from 'react-native';
 import { store } from './src/store';
-import AppNavigator from './src/navigation/AppNavigator'; // Import your AppNavigator
+import AppNavigator from './src/navigation/AppNavigator';
 
-// Create a theme that always uses light colors
 const lightTheme = {
   ...DefaultTheme,
   colors: {
@@ -19,7 +17,6 @@ const lightTheme = {
   },
 };
 
-// Main App component
 const App = () => {
   return (
     <ReduxProvider store={store}>
