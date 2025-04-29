@@ -8,9 +8,8 @@ import LoginScreen from '../screens/Login';
 // import SplashScreen from '../screens/SplashScreen';
 // import LoginScreen from '../screens/Login';
 import DashboardScreen from '../screens/DashboardScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 
-// Placeholder components for screens you'll implement later
-const RegisterScreen = () => null;
 const ForgotPasswordScreen = () => null;
 // Add other placeholder screens as needed
 
@@ -28,7 +27,7 @@ const AppNavigator: React.FC = () => {
             {/* Authentication Flow */}
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
-            {/* <Stack.Screen name="Register" component={RegisterScreen} /> */}
+            <Stack.Screen name="Register" component={RegisterScreen} />
             {/* <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} /> */}
 
             {/* Main App Flow */}
