@@ -1,17 +1,55 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView, ViewStyle } from 'react-native';
 import { Avatar } from 'react-native-paper';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 
-export default function ProjectDetailScreen() {
-    const navigation = useNavigation();
-    const route = useRoute();
+// Define types
+type TeamMember = {
+    id: number;
+    avatar: string;
+};
+
+type Task = {
+    id: number;
+    title: string;
+    completed: boolean;
+};
+
+type Project = {
+    id: number;
+    title: string;
+    description: string;
+    dueDate: string;
+    progress: number;
+    totalTasks: number;
+    completedTasks: number;
+    team: TeamMember[];
+    tasks: Task[];
+};
+
+// Define the param list for navigation
+type RootStackParamList = {
+    Home: undefined;
+    ProjectDetail: { project: Project };
+};
+
+// Type for navigation
+type ProjectDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ProjectDetail'>;
+
+// Type for route
+type ProjectDetailScreenRouteProp = RouteProp<RootStackParamList, 'ProjectDetail'>;
+
+const ProjectDetailScreen: React.FC = () => {
+    const navigation = useNavigation<ProjectDetailScreenNavigationProp>();
+    const route = useRoute<ProjectDetailScreenRouteProp>();
+
     // Add a null check when extracting project from params
     const project = route.params?.project;
 
     // For demo purposes, if no project is passed, use this default data
-    const projectData = project || {
+    const projectData: Project = project || {
         id: 1,
         title: 'Real Estate App Design',
         description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled',
@@ -38,7 +76,7 @@ export default function ProjectDetailScreen() {
     };
 
     // Render team members avatars with overlap effect - with null checks
-    const renderTeamMembers = (members) => {
+    const renderTeamMembers = (members: TeamMember[] | undefined): JSX.Element => {
         // Add null check for members array
         if (!members || !Array.isArray(members) || members.length === 0) {
             return (
@@ -66,7 +104,7 @@ export default function ProjectDetailScreen() {
     };
 
     // Render circular progress indicator
-    const renderCircularProgress = (progress) => {
+    const renderCircularProgress = (progress: number | undefined): JSX.Element => {
         // Add null check for progress
         const safeProgress = typeof progress === 'number' ? progress : 0;
         const percentage = Math.round(safeProgress * 100);
@@ -87,16 +125,30 @@ export default function ProjectDetailScreen() {
                         borderWidth: strokeWidth,
                     }]} />
 
-                    {/* Progress Circle */}
-                    <View style={[styles.circleProgress, {
-                        width: size,
-                        height: size,
-                        borderRadius: size / 2,
-                        borderWidth: strokeWidth,
-                        strokeDasharray: circumference,
-                        strokeDashoffset: strokeDashoffset,
-                        transform: [{ rotateZ: '-90deg' }]
-                    }]} />
+                    {/* Progress Circle - using styles instead of inline props for strokeDasharray */}
+                    <View style={[
+                        styles.circleProgress,
+                        {
+                            width: size,
+                            height: size,
+                            borderRadius: size / 2,
+                            borderWidth: strokeWidth,
+                            transform: [{ rotateZ: '-90deg' }]
+                        } as ViewStyle,
+                        // Apply these as a separate style object with type assertion
+                        {
+                            borderColor: '#6c5ce7',
+                            borderLeftColor: 'transparent',
+                            borderBottomColor: 'transparent',
+                        } as ViewStyle,
+                        // Use custom property as a style with type assertion
+                        {
+                            // @ts-ignore - custom property for SVG-like styling
+                            strokeDasharray: circumference,
+                            // @ts-ignore - custom property for SVG-like styling
+                            strokeDashoffset: strokeDashoffset
+                        } as ViewStyle
+                    ]} />
 
                     {/* Percentage Text */}
                     <View style={[styles.circleCenter, { width: size, height: size }]}>
@@ -180,7 +232,7 @@ export default function ProjectDetailScreen() {
                 <Text style={styles.sectionTitle}>All Tasks</Text>
                 <View style={styles.tasksList}>
                     {projectData.tasks && Array.isArray(projectData.tasks) && projectData.tasks.length > 0 ? (
-                        projectData.tasks.map(task => (
+                        projectData.tasks.map((task: Task) => (
                             <View key={task.id} style={styles.taskItem}>
                                 <Text style={styles.taskTitle}>{task.title}</Text>
                                 <View style={styles.checkboxContainer}>
@@ -215,7 +267,7 @@ export default function ProjectDetailScreen() {
             </SafeAreaView>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -341,7 +393,6 @@ const styles = StyleSheet.create({
     },
     circleProgress: {
         position: 'absolute',
-        borderColor: '#6c5ce7',
         borderLeftColor: 'transparent',
         borderBottomColor: 'transparent',
     },
@@ -434,3 +485,5 @@ const styles = StyleSheet.create({
         color: '#666666',
     }
 });
+
+export default ProjectDetailScreen;
