@@ -6,7 +6,7 @@ import SplashScreen from '../screens/SplashScreen';
 import LoginScreen from '../screens/Login';
 import DashboardScreen from '../screens/DashboardScreen';
 import RegisterScreen from '../screens/RegisterScreen';
-import ProjectDetailScreen from '../screens/HomeScreen/ProjectDetailsScreen';
+import ProjectDetailScreen from '../screens/ProjectDetailsScreen';
 
 // Define the root stack parameter list type
 export type RootStackParamList = {
