@@ -1,36 +1,57 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { RouteProp, ParamListBase } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
+import HomeScreen from './HomeScreen';
 
 // Import HomeScreen correctly - adjust path as needed
-import HomeScreen from './HomeScreen';  // Correct import for HomeScreen
+
+// Define the tab navigator param list
+type TabParamList = {
+    Home: undefined;
+    Calendar: undefined;
+    Add: undefined;
+    Notifications: undefined;
+    Profile: undefined;
+};
+
+// Type for the route in screenOptions
+type TabRouteProp = RouteProp<TabParamList, keyof TabParamList>;
 
 // Placeholder screens for other tabs
-const ProfileScreen = () => (
+const ProfileScreen: React.FC = () => (
     <View style={styles.placeholderContainer}>
         <Text style={styles.placeholderText}>Profile Screen</Text>
     </View>
 );
 
-const NotificationsScreen = () => (
+const NotificationsScreen: React.FC = () => (
     <View style={styles.placeholderContainer}>
         <Text style={styles.placeholderText}>Notifications Screen</Text>
     </View>
 );
 
-const CalendarScreen = () => (
+const CalendarScreen: React.FC = () => (
     <View style={styles.placeholderContainer}>
         <Text style={styles.placeholderText}>Calendar Screen</Text>
     </View>
 );
 
-const Tab = createBottomTabNavigator();
+// Create the tab navigator with proper typing
+const Tab = createBottomTabNavigator<TabParamList>();
 
-export default function DashboardScreen() {
+// Type for tabBarIcon props
+interface TabBarIconProps {
+    focused: boolean;
+    color: string;
+    size: number;
+}
+
+const DashboardScreen: React.FC = () => {
     return (
         <Tab.Navigator
-            screenOptions={({ route }) => ({
+            screenOptions={({ route }: { route: TabRouteProp }) => ({
                 headerShown: false,
                 tabBarActiveTintColor: '#6c5ce7',
                 tabBarInactiveTintColor: '#999',
@@ -43,8 +64,8 @@ export default function DashboardScreen() {
                     shadowRadius: 3,
                     shadowOffset: { height: -3, width: 0 },
                 },
-                tabBarIcon: ({ color, size, focused }) => {
-                    let iconName;
+                tabBarIcon: ({ color, size, focused }: TabBarIconProps) => {
+                    let iconName: string = '';
 
                     if (route.name === 'Home') {
                         iconName = 'home';
@@ -54,7 +75,7 @@ export default function DashboardScreen() {
                         return (
                             <View style={styles.addButtonContainer}>
                                 <View style={styles.addButton}>
-                                    <Icon name="plus" size={24} color="#6c5ce7" />
+                                    <Icon name="plus" size={24} color="white" />
                                 </View>
                             </View>
                         );
@@ -74,13 +95,13 @@ export default function DashboardScreen() {
                 name="Add"
                 component={HomeScreen}
                 listeners={{
-                    tabPress: e => {
+                    tabPress: (e) => {
                         // Prevent default behavior
                         e.preventDefault();
 
                         // Handle action for add button
                         // This could open a modal or navigate to an add screen
-                        alert('Add button pressed');
+                        Alert.alert('Add button pressed');
                     },
                 }}
             />
@@ -88,7 +109,7 @@ export default function DashboardScreen() {
             <Tab.Screen name="Profile" component={ProfileScreen} />
         </Tab.Navigator>
     );
-}
+};
 
 const styles = StyleSheet.create({
     placeholderContainer: {
@@ -113,7 +134,7 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#6c5ce7',
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
@@ -123,3 +144,5 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
 });
+
+export default DashboardScreen;
