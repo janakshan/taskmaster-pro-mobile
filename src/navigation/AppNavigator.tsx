@@ -7,6 +7,7 @@ import LoginScreen from '../screens/Login';
 import DashboardScreen from '../screens/DashboardScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import ProjectDetailScreen from '../screens/ProjectDetailsScreen';
+import ProfileScreen from 'src/screens/ProfileScreen';
 
 // Define the root stack parameter list type
 export type RootStackParamList = {
@@ -14,6 +15,7 @@ export type RootStackParamList = {
     Login: undefined;
     Register: undefined;
     Dashboard: undefined;
+    Profile: undefined;
     ProjectDetail: { project: any }; // Replace 'any' with your Project type
 };
 
@@ -36,6 +38,7 @@ const AppNavigator: React.FC = () => {
             {/* Main App Flow */}
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
             <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
 
             {/* Add other screens as you implement them */}
         </Stack.Navigator>
