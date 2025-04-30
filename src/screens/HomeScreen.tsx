@@ -41,6 +41,7 @@ type Project = {
 type RootStackParamList = {
     Home: undefined;
     ProjectDetail: { project: Project };
+    Profile: undefined;
 };
 
 // Type for navigation prop
@@ -159,6 +160,11 @@ const HomeScreen: React.FC = () => {
         },
     ];
 
+    // Navigate to profile screen
+    const handleProfilePress = () => {
+        navigation.navigate('Profile');
+    };
+
     // Render team members avatars with overlap effect
     const renderTeamMembers = (members: TeamMember[]) => {
         const visibleMembers = members.slice(0, 4); // Show only first 4 members
@@ -225,13 +231,18 @@ const HomeScreen: React.FC = () => {
             <View style={styles.header}>
                 <View>
                     <Text style={styles.welcomeBack}>Welcome Back!</Text>
-                    <Text style={styles.userName}>Fazil Laghari</Text>
+                    {/* Make username text touchable */}
+                    <TouchableOpacity onPress={handleProfilePress}>
+                        <Text style={styles.userName}>Fazil Laghari</Text>
+                    </TouchableOpacity>
                 </View>
-                <Avatar.Image
-                    source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }}
-                    size={50}
-                    style={styles.userAvatar}
-                />
+                <TouchableOpacity onPress={handleProfilePress}>
+                    <Avatar.Image
+                        source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }}
+                        size={50}
+                        style={styles.userAvatar}
+                    />
+                </TouchableOpacity>
             </View>
 
             {/* Search Bar */}

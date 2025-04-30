@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RouteProp, ParamListBase } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import HomeScreen from './HomeScreen';
+import ProfileScreen from './ProfileScreen';
 
 // Import HomeScreen correctly - adjust path as needed
 
@@ -20,11 +21,11 @@ type TabParamList = {
 type TabRouteProp = RouteProp<TabParamList, keyof TabParamList>;
 
 // Placeholder screens for other tabs
-const ProfileScreen: React.FC = () => (
-    <View style={styles.placeholderContainer}>
-        <Text style={styles.placeholderText}>Profile Screen</Text>
-    </View>
-);
+// const ProfileScreen: React.FC = () => (
+//     <View style={styles.placeholderContainer}>
+//         <Text style={styles.placeholderText}>Profile Screen</Text>
+//     </View>
+// );
 
 const NotificationsScreen: React.FC = () => (
     <View style={styles.placeholderContainer}>
