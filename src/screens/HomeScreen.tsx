@@ -1,11 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView } from 'react-native';
-import { Searchbar, Card, ProgressBar, Avatar, Button } from 'react-native-paper';
+import { Searchbar, Avatar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import { StackNavigationProp } from '@react-navigation/stack';
+import CompletedProjects from 'src/components/CompletedProjects';
+import OngoingProjects from 'src/components/OngoingProjects';
 
-// Define types for our data structures
+
+// Types
 type TeamMember = {
     id: number;
     avatar: string;
@@ -94,7 +97,7 @@ const HomeScreen: React.FC = () => {
         },
     ];
 
-    // // Mock data for ongoing projects
+    // Mock data for ongoing projects
     const ongoingProjects: Project[] = [
         {
             id: 1,
@@ -126,7 +129,7 @@ const HomeScreen: React.FC = () => {
                 { id: 3, avatar: 'https://randomuser.me/api/portraits/men/10.jpg' },
             ],
             dueDate: '20 June',
-            progress: 0, // 60%
+            progress: 0, // 0%
             description: 'Design a comprehensive real estate application with property search, filtering, and detailed listing views',
             totalTasks: 10,
             completedTasks: 0,
@@ -166,113 +169,28 @@ const HomeScreen: React.FC = () => {
         },
     ];
 
-    // For testing empty states, uncomment these lines:
-    // const completedTasks: CompletedTask[] = [];
-    // const ongoingProjects: Project[] = [];
-
     // Navigate to profile screen
     const handleProfilePress = () => {
         navigation.navigate('Profile');
     };
 
-    // Navigate to create project screen
-    const handleCreateProjectPress = () => {
-        // Replace with actual navigation to create project screen
-        // navigation.navigate('CreateProject');
-        console.log('Navigate to create project screen');
+    // Handle "See All" button press
+    const handleSeeAllCompletedTasks = () => {
+        console.log('Navigate to all completed tasks');
     };
 
-    // Render team members avatars with overlap effect
-    const renderTeamMembers = (members: TeamMember[]) => {
-        const visibleMembers = members.slice(0, 4); // Show only first 4 members
-        const remainingCount = members.length - 4;
-
-        return (
-            <View style={styles.teamMembersContainer}>
-                {visibleMembers.map((member, index) => (
-                    <Avatar.Image
-                        key={member.id}
-                        source={{ uri: member.avatar }}
-                        size={30}
-                        style={[
-                            styles.memberAvatar,
-                            { marginLeft: index > 0 ? -12 : 0 },
-                        ]}
-                    />
-                ))}
-                {remainingCount > 0 && (
-                    <View style={styles.remainingMembersContainer}>
-                        <Text style={styles.remainingMembersText}>+{remainingCount}</Text>
-                    </View>
-                )}
-            </View>
-        );
+    const handleSeeAllOngoingProjects = () => {
+        console.log('Navigate to all ongoing projects');
     };
-
-    // Render a progress circle for ongoing projects
-    const renderProgressCircle = (progress: number) => {
-        const percentage = Math.round(progress * 100);
-        const circumference = 2 * Math.PI * 30; // Circle with radius 30
-        const strokeDashoffset = circumference * (1 - progress);
-
-        return (
-            <View style={styles.progressCircleContainer}>
-                <View style={styles.progressCircleWrapper}>
-                    <View style={styles.progressCircle}>
-                        <Text style={styles.progressText}>{percentage}%</Text>
-                    </View>
-                    <View style={styles.progressCircleBackground} />
-                    <View
-                        style={[
-                            styles.progressCircleValue,
-                            {
-                                strokeDasharray: circumference,
-                                strokeDashoffset: strokeDashoffset
-                            }
-                        ]}
-                    />
-                </View>
-            </View>
-        );
-    };
-
-    // Handle project card press - navigate to project details
-    const handleProjectPress = (project: Project) => {
-        navigation.navigate('ProjectDetail', { project });
-    };
-
-    // Render empty state for completed tasks
-    const renderEmptyCompletedTasks = () => (
-        <View style={styles.emptyCompletedTaskCard}>
-            <Icon name="check-circle" size={40} color="#d0d0d0" />
-            <Text style={styles.emptyStateText}>No completed tasks yet</Text>
-        </View>
-    );
-
-    // Render empty state for ongoing projects
-    const renderEmptyOngoingProjects = () => (
-        <Card style={styles.emptyProjectCard}>
-            <Card.Content style={styles.emptyProjectCardContent}>
-                <Icon name="folder" size={40} color="#d0d0d0" />
-                <Text style={styles.emptyStateText}>No ongoing projects found</Text>
-                <TouchableOpacity
-                    style={styles.createProjectButton}
-                    onPress={handleCreateProjectPress}
-                >
-                    <Text style={styles.createProjectButtonText}>Create Project</Text>
-                </TouchableOpacity>
-            </Card.Content>
-        </Card>
-    );
 
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+
             {/* Header Section */}
             <View style={styles.header}>
                 <View>
                     <Text style={styles.welcomeBack}>Welcome Back!</Text>
-                    {/* Make username text touchable */}
                     <TouchableOpacity onPress={handleProfilePress}>
                         <Text style={styles.userName}>Fazil Laghari</Text>
                     </TouchableOpacity>
@@ -305,84 +223,17 @@ const HomeScreen: React.FC = () => {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {/* Completed Tasks Section */}
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Completed Tasks</Text>
-                    <TouchableOpacity>
-                        <Text style={styles.seeAllText}>See all</Text>
-                    </TouchableOpacity>
-                </View>
+                {/* Completed Tasks Component */}
+                <CompletedProjects
+                    tasks={completedTasks}
+                    onSeeAllPress={handleSeeAllCompletedTasks}
+                />
 
-                {/* Horizontal Scroll for Completed Tasks */}
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.horizontalScrollContent}
-                >
-                    {completedTasks.length > 0 ? (
-                        completedTasks.map((task) => (
-                            <Card key={task.id} style={[styles.completedTaskCard, { backgroundColor: task.color }]}>
-                                <Card.Content style={styles.cardContent}>
-                                    <Text style={styles.completedTaskTitle}>{task.title}</Text>
-                                    <View style={styles.taskInfoContainer}>
-                                        <Text style={styles.teamMembersLabel}>Team members</Text>
-                                        {renderTeamMembers(task.teamMembers)}
-                                    </View>
-                                    <View style={styles.completedContainer}>
-                                        <Text style={styles.completedText}>Completed</Text>
-                                        <Text style={styles.completedPercentage}>
-                                            {Math.round(task.progress * 100)}%
-                                        </Text>
-                                    </View>
-                                    <ProgressBar
-                                        progress={task.progress}
-                                        color="#ffffff"
-                                        style={styles.progressBar}
-                                    />
-                                </Card.Content>
-                            </Card>
-                        ))
-                    ) : (
-                        renderEmptyCompletedTasks()
-                    )}
-                </ScrollView>
-
-                {/* Ongoing Projects Section */}
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Ongoing Projects</Text>
-                    <TouchableOpacity>
-                        <Text style={styles.seeAllText}>See all</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* List of Ongoing Projects */}
-                {ongoingProjects.length > 0 ? (
-                    ongoingProjects.map((project) => (
-                        <TouchableOpacity
-                            key={project.id}
-                            onPress={() => handleProjectPress(project)}
-                            activeOpacity={0.7}
-                        >
-                            <Card style={styles.ongoingProjectCard}>
-                                <Card.Content style={styles.projectCardContent}>
-                                    <View style={styles.projectMainInfo}>
-                                        <View>
-                                            <Text style={styles.projectTitle}>{project.title}</Text>
-                                            <Text style={styles.teamMembersLabel}>Team members</Text>
-                                            {renderTeamMembers(project.teamMembers)}
-                                            <Text style={styles.dueDate}>
-                                                Due on : {project.dueDate}
-                                            </Text>
-                                        </View>
-                                        {renderProgressCircle(project.progress)}
-                                    </View>
-                                </Card.Content>
-                            </Card>
-                        </TouchableOpacity>
-                    ))
-                ) : (
-                    renderEmptyOngoingProjects()
-                )}
+                {/* Ongoing Projects Component */}
+                <OngoingProjects
+                    projects={ongoingProjects}
+                    onSeeAllPress={handleSeeAllOngoingProjects}
+                />
             </ScrollView>
         </SafeAreaView>
     );
@@ -441,204 +292,6 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         paddingBottom: 80, // Space for bottom navigation
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        marginBottom: 15,
-        marginTop: 20,
-    },
-    sectionTitle: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: '#333333',
-    },
-    seeAllText: {
-        fontSize: 16,
-        color: '#6c5ce7',
-        fontWeight: '500',
-    },
-    horizontalScrollContent: {
-        paddingLeft: 20,
-        paddingRight: 10,
-    },
-    completedTaskCard: {
-        width: 240,
-        borderRadius: 12,
-        marginRight: 15,
-        elevation: 4,
-    },
-    cardContent: {
-        padding: 5,
-    },
-    completedTaskTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#ffffff',
-        marginBottom: 15,
-    },
-    taskInfoContainer: {
-        marginBottom: 20,
-    },
-    teamMembersLabel: {
-        fontSize: 14,
-        color: '#333333',
-        marginBottom: 8,
-    },
-    teamMembersContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    memberAvatar: {
-        borderWidth: 2,
-        borderColor: '#ffffff',
-    },
-    remainingMembersContainer: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: 'rgba(255, 255, 255, 0.3)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginLeft: -12,
-        borderWidth: 2,
-        borderColor: '#ffffff',
-    },
-    remainingMembersText: {
-        fontSize: 12,
-        color: '#ffffff',
-        fontWeight: 'bold',
-    },
-    completedContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    completedText: {
-        fontSize: 14,
-        color: '#ffffff',
-    },
-    completedPercentage: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#ffffff',
-    },
-    progressBar: {
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    },
-    ongoingProjectCard: {
-        marginHorizontal: 20,
-        marginBottom: 15,
-        borderRadius: 12,
-        backgroundColor: '#FFE6C9',
-        elevation: 2,
-    },
-    projectCardContent: {
-        padding: 10,
-    },
-    projectMainInfo: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    projectTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333333',
-        marginBottom: 15,
-    },
-    dueDate: {
-        fontSize: 14,
-        color: '#666666',
-        marginTop: 10,
-    },
-    progressCircleContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    progressCircleWrapper: {
-        width: 70,
-        height: 70,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    progressCircle: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#ffffff',
-        elevation: 2,
-    },
-    progressCircleBackground: {
-        position: 'absolute',
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        borderWidth: 5,
-        borderColor: '#e0e0e0',
-    },
-    progressCircleValue: {
-        position: 'absolute',
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        borderWidth: 5,
-        borderColor: '#6c5ce7',
-        borderTopColor: 'transparent',
-        borderRightColor: 'transparent',
-        transform: [{ rotateZ: '-90deg' }],
-    },
-    progressText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#6c5ce7',
-    },
-    // Empty state styles
-    emptyCompletedTaskCard: {
-        width: 240,
-        height: 180,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 12,
-        marginRight: 15,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    emptyProjectCard: {
-        marginHorizontal: 20,
-        marginBottom: 15,
-        borderRadius: 12,
-        backgroundColor: '#f5f5f5',
-    },
-    emptyProjectCardContent: {
-        padding: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 180,
-    },
-    emptyStateText: {
-        fontSize: 16,
-        color: '#757575',
-        textAlign: 'center',
-        marginTop: 12,
-    },
-    createProjectButton: {
-        marginTop: 20,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        backgroundColor: '#6c5ce7',
-        borderRadius: 8,
-    },
-    createProjectButtonText: {
-        color: '#ffffff',
-        fontWeight: '500',
-        fontSize: 14,
     },
 });
 
