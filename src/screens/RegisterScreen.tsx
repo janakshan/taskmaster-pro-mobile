@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, StatusBar } from 'react-native';
 import { TextInput, Button, Text, ActivityIndicator, Checkbox } from 'react-native-paper';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
@@ -93,114 +93,121 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
     };
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-            <Text style={styles.titleText}>Signup</Text>
+        <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+            <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+                <Text style={styles.titleText}>Signup</Text>
 
-            <View style={styles.formContainer}>
-                <Text style={styles.inputLabel}>Full Name</Text>
-                <View style={styles.inputContainer}>
-                    <TextInput
-                        value={name}
-                        onChangeText={setName}
-                        mode="flat"
-                        autoCapitalize="words"
-                        style={styles.input}
-                        placeholder="Enter your full name"
-                        underlineColor="transparent"
-                        left={<TextInput.Icon icon="account" color="#666" />}
-                    />
-                </View>
+                <View style={styles.formContainer}>
+                    <Text style={styles.inputLabel}>Full Name</Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                            value={name}
+                            onChangeText={setName}
+                            mode="flat"
+                            autoCapitalize="words"
+                            style={styles.input}
+                            placeholder="Enter your full name"
+                            underlineColor="transparent"
+                            left={<TextInput.Icon icon="account" color="#666" />}
+                        />
+                    </View>
 
-                <Text style={styles.inputLabel}>Email Address</Text>
-                <View style={styles.inputContainer}>
-                    <TextInput
-                        value={email}
-                        onChangeText={setEmail}
-                        mode="flat"
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                        style={styles.input}
-                        placeholder="Enter your email"
-                        underlineColor="transparent"
-                        left={<TextInput.Icon icon="email" color="#666" />}
-                    />
-                </View>
+                    <Text style={styles.inputLabel}>Email Address</Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                            value={email}
+                            onChangeText={setEmail}
+                            mode="flat"
+                            autoCapitalize="none"
+                            keyboardType="email-address"
+                            style={styles.input}
+                            placeholder="Enter your email"
+                            underlineColor="transparent"
+                            left={<TextInput.Icon icon="email" color="#666" />}
+                        />
+                    </View>
 
-                <Text style={styles.inputLabel}>Password</Text>
-                <View style={styles.inputContainer}>
-                    <TextInput
-                        value={password}
-                        onChangeText={setPassword}
-                        mode="flat"
-                        secureTextEntry={!passwordVisible}
-                        style={styles.input}
-                        placeholder="Enter your password"
-                        underlineColor="transparent"
-                        left={<TextInput.Icon icon="lock" color="#666" />}
-                        right={
-                            <TextInput.Icon
-                                icon={passwordVisible ? "eye-off" : "eye"}
-                                color="#666"
-                                onPress={() => setPasswordVisible(!passwordVisible)}
-                            />
-                        }
-                    />
-                </View>
+                    <Text style={styles.inputLabel}>Password</Text>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                            value={password}
+                            onChangeText={setPassword}
+                            mode="flat"
+                            secureTextEntry={!passwordVisible}
+                            style={styles.input}
+                            placeholder="Enter your password"
+                            underlineColor="transparent"
+                            left={<TextInput.Icon icon="lock" color="#666" />}
+                            right={
+                                <TextInput.Icon
+                                    icon={passwordVisible ? "eye-off" : "eye"}
+                                    color="#666"
+                                    onPress={() => setPasswordVisible(!passwordVisible)}
+                                />
+                            }
+                        />
+                    </View>
 
-                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                    {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-                <View style={styles.termsContainer}>
-                    <Checkbox
-                        status={agreedToTerms ? 'checked' : 'unchecked'}
-                        onPress={() => setAgreedToTerms(!agreedToTerms)}
-                        color="#6039FF"
-                    />
-                    <Text style={styles.termsText}>
-                        I have read & agreed to DayTask{' '}
-                        <Text style={styles.linkText} onPress={() => {/* Open privacy policy */ }}>
-                            Privacy Policy
-                        </Text>,{' '}
-                        <Text style={styles.linkText} onPress={() => {/* Open terms */ }}>
-                            Terms & Condition
+                    <View style={styles.termsContainer}>
+                        <Checkbox
+                            status={agreedToTerms ? 'checked' : 'unchecked'}
+                            onPress={() => setAgreedToTerms(!agreedToTerms)}
+                            color="#6039FF"
+                        />
+                        <Text style={styles.termsText}>
+                            I have read & agreed to TaskMaster Pro{' '}
+                            <Text style={styles.linkText} onPress={() => {/* Open privacy policy */ }}>
+                                Privacy Policy
+                            </Text>,{' '}
+                            <Text style={styles.linkText} onPress={() => {/* Open terms */ }}>
+                                Terms & Condition
+                            </Text>
                         </Text>
-                    </Text>
-                </View>
+                    </View>
 
-                <Button
-                    mode="contained"
-                    onPress={handleRegister}
-                    style={styles.registerButton}
-                    labelStyle={styles.registerButtonText}
-                    disabled={loading}
-                >
-                    {loading ? <ActivityIndicator color="#fff" /> : 'Sign Up'}
-                </Button>
+                    <Button
+                        mode="contained"
+                        onPress={handleRegister}
+                        style={styles.registerButton}
+                        labelStyle={styles.registerButtonText}
+                        disabled={loading}
+                    >
+                        {loading ? <ActivityIndicator color="#fff" /> : 'Sign Up'}
+                    </Button>
 
-                <View style={styles.loginContainer}>
-                    <Text style={styles.haveAccountText}>Already have an account? </Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                        <Text style={styles.loginText}>Log In</Text>
-                    </TouchableOpacity>
+                    <View style={styles.loginContainer}>
+                        <Text style={styles.haveAccountText}>Already have an account? </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                            <Text style={styles.loginText}>Log In</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
     container: {
         flex: 1,
         backgroundColor: '#fff',
     },
     contentContainer: {
         padding: 20,
-        paddingTop: 40,
+        paddingTop: 80, // Reduced from 40 to give proper spacing after SafeAreaView
     },
     titleText: {
         fontSize: 42,
         fontWeight: 'bold',
         color: '#6039FF',
-        marginBottom: 40,
+        marginBottom: 30,
     },
     formContainer: {
         width: '100%',
@@ -267,4 +274,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default RegisterScreen
+export default RegisterScreen;
