@@ -125,16 +125,21 @@ const HomeScreen: React.FC = () => {
                 { id: 3, avatar: 'https://randomuser.me/api/portraits/men/10.jpg' },
             ],
             dueDate: '20 June',
-            progress: 0.6, // 60%
+            progress: 0, // 60%
             description: 'Design a comprehensive real estate application with property search, filtering, and detailed listing views',
-            totalTasks: 8,
-            completedTasks: 5,
+            totalTasks: 10,
+            completedTasks: 0,
             tasks: [
                 { id: 1, title: 'User Interviews', completed: true },
                 { id: 2, title: 'Wireframes', completed: true },
                 { id: 3, title: 'Design System', completed: true },
                 { id: 4, title: 'Icons', completed: false },
-                { id: 5, title: 'Final Mockups', completed: false },
+                { id: 5, title: 'Final Mockups1', completed: false },
+                { id: 6, title: 'Usability Testing', completed: false },
+                { id: 7, title: 'Prototyping', completed: false },
+                { id: 8, title: 'Developer Handoff', completed: false },
+                { id: 9, title: 'Client Meeting', completed: false },
+                { id: 10, title: 'Project Review', completed: false },
             ]
         },
         {

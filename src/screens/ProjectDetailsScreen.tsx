@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView, ViewStyle } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, SafeAreaView, ViewStyle, FlatList } from 'react-native';
 import { Avatar } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -49,13 +49,13 @@ const ProjectDetailScreen: React.FC = () => {
     const project = route.params?.project;
 
     // For demo purposes, if no project is passed, use this default data
-    const projectData: Project = project || {
+    const defaultProject: Project = {
         id: 1,
         title: 'Real Estate App Design',
         description: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled',
         dueDate: '20 June',
         progress: 0.6, // 60%
-        totalTasks: 5,
+        totalTasks: 10, // Updated to match total
         completedTasks: 3,
         team: [
             { id: 1, avatar: 'https://randomuser.me/api/portraits/men/1.jpg' },
@@ -67,12 +67,42 @@ const ProjectDetailScreen: React.FC = () => {
             { id: 2, title: 'Wireframes', completed: true },
             { id: 3, title: 'Design System', completed: true },
             { id: 4, title: 'Icons', completed: false },
-            { id: 5, title: 'Final Mockups', completed: false },
-            // Add more tasks to demonstrate scrolling
+            { id: 5, title: 'Final Mockups1', completed: false },
             { id: 6, title: 'Usability Testing', completed: false },
             { id: 7, title: 'Prototyping', completed: false },
-            { id: 8, title: 'Developer Handoff', completed: false }
+            { id: 8, title: 'Developer Handoff', completed: false },
+            { id: 9, title: 'Client Meeting', completed: false },
+            { id: 10, title: 'Project Review', completed: false },
         ]
+    };
+
+    // Use state to manage project data so we can update task completion status
+    const [projectData, setProjectData] = useState<Project>(project || defaultProject);
+
+    // Function to toggle task completion status
+    const toggleTaskCompletion = (taskId: number) => {
+        setProjectData(prevData => {
+            // Create a new tasks array with the updated completion status for the selected task
+            const updatedTasks = prevData.tasks.map(task =>
+                task.id === taskId ? { ...task, completed: !task.completed } : task
+            );
+
+            // Count the number of completed tasks
+            const completedTasksCount = updatedTasks.filter(task => task.completed).length;
+
+            // Calculate the new progress
+            const newProgress = prevData.totalTasks > 0
+                ? completedTasksCount / prevData.totalTasks
+                : 0;
+
+            // Return the updated project data
+            return {
+                ...prevData,
+                tasks: updatedTasks,
+                completedTasks: completedTasksCount,
+                progress: newProgress
+            };
+        });
     };
 
     // Render team members avatars with overlap effect - with null checks
@@ -159,6 +189,26 @@ const ProjectDetailScreen: React.FC = () => {
         );
     };
 
+    // Task item renderer for FlatList
+    const renderTaskItem = ({ item }: { item: Task }) => (
+        <View style={styles.taskItem}>
+            <Text style={styles.taskTitle}>{item.title}</Text>
+            <TouchableOpacity
+                style={styles.checkboxContainer}
+                onPress={() => toggleTaskCompletion(item.id)}
+                activeOpacity={0.7}
+            >
+                {item.completed ? (
+                    <View style={styles.checkedBox}>
+                        <Icon name="check" size={18} color="#6c5ce7" />
+                    </View>
+                ) : (
+                    <View style={styles.uncheckedBox} />
+                )}
+            </TouchableOpacity>
+        </View>
+    );
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
@@ -177,10 +227,8 @@ const ProjectDetailScreen: React.FC = () => {
                 </View>
             </SafeAreaView>
 
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContent}
-            >
+            {/* Main content (not scrollable) */}
+            <View style={styles.mainContent}>
                 {/* Project Title */}
                 <Text style={styles.projectTitle}>{projectData.title || 'Untitled Project'}</Text>
 
@@ -228,34 +276,32 @@ const ProjectDetailScreen: React.FC = () => {
                     </View>
                 </View>
 
-                {/* Tasks List - with null check */}
+                {/* Tasks List Title */}
                 <Text style={styles.sectionTitle}>All Tasks</Text>
-                <View style={styles.tasksList}>
-                    {projectData.tasks && Array.isArray(projectData.tasks) && projectData.tasks.length > 0 ? (
-                        projectData.tasks.map((task: Task) => (
-                            <View key={task.id} style={styles.taskItem}>
-                                <Text style={styles.taskTitle}>{task.title}</Text>
-                                <View style={styles.checkboxContainer}>
-                                    {task.completed ? (
-                                        <View style={styles.checkedBox}>
-                                            <Icon name="check" size={18} color="#6c5ce7" />
-                                        </View>
-                                    ) : (
-                                        <View style={styles.uncheckedBox} />
-                                    )}
-                                </View>
-                            </View>
-                        ))
-                    ) : (
-                        <View style={styles.noTasksContainer}>
-                            <Text style={styles.noTasksText}>No tasks available</Text>
-                        </View>
-                    )}
-                </View>
+            </View>
 
-                {/* Add extra space at bottom for fixed Add Task button */}
-                <View style={styles.bottomSpacer} />
-            </ScrollView>
+            {/* Tasks List as its own section with FlatList */}
+            <View style={styles.taskListContainer}>
+                {projectData.tasks && projectData.tasks.length > 0 ? (
+                    <FlatList
+                        data={projectData.tasks}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={renderTaskItem}
+                        style={styles.tasksList}
+                        contentContainerStyle={styles.tasksListContent}
+                        showsVerticalScrollIndicator={false}
+                        ListEmptyComponent={
+                            <View style={styles.noTasksContainer}>
+                                <Text style={styles.noTasksText}>No tasks available</Text>
+                            </View>
+                        }
+                    />
+                ) : (
+                    <View style={styles.noTasksContainer}>
+                        <Text style={styles.noTasksText}>No tasks available</Text>
+                    </View>
+                )}
+            </View>
 
             {/* Fixed Add Task Button */}
             <SafeAreaView style={styles.safeBottom}>
@@ -297,9 +343,8 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#666666',
     },
-    scrollContent: {
+    mainContent: {
         paddingHorizontal: 20,
-        paddingBottom: 20,
     },
     projectTitle: {
         fontSize: 28,
@@ -406,8 +451,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#6c5ce7',
     },
+    taskListContainer: {
+        flex: 1, // Take all remaining space
+        paddingHorizontal: 20,
+        marginBottom: 90, // Make room for the button
+    },
     tasksList: {
-        marginBottom: 24,
+        flex: 1,
+    },
+    tasksListContent: {
+        paddingBottom: 16,
     },
     taskItem: {
         flexDirection: 'row',
@@ -424,6 +477,9 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '500',
         color: '#FFFFFF',
+        // Make sure task title doesn't overlap with checkbox
+        flex: 1,
+        marginRight: 10,
     },
     checkboxContainer: {
         width: 28,
@@ -460,21 +516,19 @@ const styles = StyleSheet.create({
         color: '#999999',
         fontStyle: 'italic',
     },
-    bottomSpacer: {
-        height: 80, // Space for the fixed button
-    },
     fixedButtonContainer: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        padding: 16,
+        paddingHorizontal: 45,
+        paddingVertical: 25,
         backgroundColor: '#ffffff',
         borderTopWidth: 1,
         borderTopColor: '#f0f0f0',
     },
     addTaskButton: {
-        backgroundColor: '#FFF2E2',
+        backgroundColor: '#F8B55F',
         borderRadius: 8,
         paddingVertical: 16,
         alignItems: 'center',
