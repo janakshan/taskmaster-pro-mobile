@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, SafeAreaView } from 'react-native';
-import { Searchbar, Card, ProgressBar, Avatar } from 'react-native-paper';
+import { Searchbar, Card, ProgressBar, Avatar, Button } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -42,6 +42,7 @@ type RootStackParamList = {
     Home: undefined;
     ProjectDetail: { project: Project };
     Profile: undefined;
+    CreateProject: undefined;
 };
 
 // Type for navigation prop
@@ -93,7 +94,7 @@ const HomeScreen: React.FC = () => {
         },
     ];
 
-    // Mock data for ongoing projects
+    // // Mock data for ongoing projects
     const ongoingProjects: Project[] = [
         {
             id: 1,
@@ -165,9 +166,20 @@ const HomeScreen: React.FC = () => {
         },
     ];
 
+    // For testing empty states, uncomment these lines:
+    // const completedTasks: CompletedTask[] = [];
+    // const ongoingProjects: Project[] = [];
+
     // Navigate to profile screen
     const handleProfilePress = () => {
         navigation.navigate('Profile');
+    };
+
+    // Navigate to create project screen
+    const handleCreateProjectPress = () => {
+        // Replace with actual navigation to create project screen
+        // navigation.navigate('CreateProject');
+        console.log('Navigate to create project screen');
     };
 
     // Render team members avatars with overlap effect
@@ -229,6 +241,30 @@ const HomeScreen: React.FC = () => {
         navigation.navigate('ProjectDetail', { project });
     };
 
+    // Render empty state for completed tasks
+    const renderEmptyCompletedTasks = () => (
+        <View style={styles.emptyCompletedTaskCard}>
+            <Icon name="check-circle" size={40} color="#d0d0d0" />
+            <Text style={styles.emptyStateText}>No completed tasks yet</Text>
+        </View>
+    );
+
+    // Render empty state for ongoing projects
+    const renderEmptyOngoingProjects = () => (
+        <Card style={styles.emptyProjectCard}>
+            <Card.Content style={styles.emptyProjectCardContent}>
+                <Icon name="folder" size={40} color="#d0d0d0" />
+                <Text style={styles.emptyStateText}>No ongoing projects found</Text>
+                <TouchableOpacity
+                    style={styles.createProjectButton}
+                    onPress={handleCreateProjectPress}
+                >
+                    <Text style={styles.createProjectButtonText}>Create Project</Text>
+                </TouchableOpacity>
+            </Card.Content>
+        </Card>
+    );
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
@@ -283,28 +319,32 @@ const HomeScreen: React.FC = () => {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.horizontalScrollContent}
                 >
-                    {completedTasks.map((task) => (
-                        <Card key={task.id} style={[styles.completedTaskCard, { backgroundColor: task.color }]}>
-                            <Card.Content style={styles.cardContent}>
-                                <Text style={styles.completedTaskTitle}>{task.title}</Text>
-                                <View style={styles.taskInfoContainer}>
-                                    <Text style={styles.teamMembersLabel}>Team members</Text>
-                                    {renderTeamMembers(task.teamMembers)}
-                                </View>
-                                <View style={styles.completedContainer}>
-                                    <Text style={styles.completedText}>Completed</Text>
-                                    <Text style={styles.completedPercentage}>
-                                        {Math.round(task.progress * 100)}%
-                                    </Text>
-                                </View>
-                                <ProgressBar
-                                    progress={task.progress}
-                                    color="#ffffff"
-                                    style={styles.progressBar}
-                                />
-                            </Card.Content>
-                        </Card>
-                    ))}
+                    {completedTasks.length > 0 ? (
+                        completedTasks.map((task) => (
+                            <Card key={task.id} style={[styles.completedTaskCard, { backgroundColor: task.color }]}>
+                                <Card.Content style={styles.cardContent}>
+                                    <Text style={styles.completedTaskTitle}>{task.title}</Text>
+                                    <View style={styles.taskInfoContainer}>
+                                        <Text style={styles.teamMembersLabel}>Team members</Text>
+                                        {renderTeamMembers(task.teamMembers)}
+                                    </View>
+                                    <View style={styles.completedContainer}>
+                                        <Text style={styles.completedText}>Completed</Text>
+                                        <Text style={styles.completedPercentage}>
+                                            {Math.round(task.progress * 100)}%
+                                        </Text>
+                                    </View>
+                                    <ProgressBar
+                                        progress={task.progress}
+                                        color="#ffffff"
+                                        style={styles.progressBar}
+                                    />
+                                </Card.Content>
+                            </Card>
+                        ))
+                    ) : (
+                        renderEmptyCompletedTasks()
+                    )}
                 </ScrollView>
 
                 {/* Ongoing Projects Section */}
@@ -316,29 +356,33 @@ const HomeScreen: React.FC = () => {
                 </View>
 
                 {/* List of Ongoing Projects */}
-                {ongoingProjects.map((project) => (
-                    <TouchableOpacity
-                        key={project.id}
-                        onPress={() => handleProjectPress(project)}
-                        activeOpacity={0.7}
-                    >
-                        <Card style={styles.ongoingProjectCard}>
-                            <Card.Content style={styles.projectCardContent}>
-                                <View style={styles.projectMainInfo}>
-                                    <View>
-                                        <Text style={styles.projectTitle}>{project.title}</Text>
-                                        <Text style={styles.teamMembersLabel}>Team members</Text>
-                                        {renderTeamMembers(project.teamMembers)}
-                                        <Text style={styles.dueDate}>
-                                            Due on : {project.dueDate}
-                                        </Text>
+                {ongoingProjects.length > 0 ? (
+                    ongoingProjects.map((project) => (
+                        <TouchableOpacity
+                            key={project.id}
+                            onPress={() => handleProjectPress(project)}
+                            activeOpacity={0.7}
+                        >
+                            <Card style={styles.ongoingProjectCard}>
+                                <Card.Content style={styles.projectCardContent}>
+                                    <View style={styles.projectMainInfo}>
+                                        <View>
+                                            <Text style={styles.projectTitle}>{project.title}</Text>
+                                            <Text style={styles.teamMembersLabel}>Team members</Text>
+                                            {renderTeamMembers(project.teamMembers)}
+                                            <Text style={styles.dueDate}>
+                                                Due on : {project.dueDate}
+                                            </Text>
+                                        </View>
+                                        {renderProgressCircle(project.progress)}
                                     </View>
-                                    {renderProgressCircle(project.progress)}
-                                </View>
-                            </Card.Content>
-                        </Card>
-                    </TouchableOpacity>
-                ))}
+                                </Card.Content>
+                            </Card>
+                        </TouchableOpacity>
+                    ))
+                ) : (
+                    renderEmptyOngoingProjects()
+                )}
             </ScrollView>
         </SafeAreaView>
     );
@@ -554,7 +598,48 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: '#6c5ce7',
-    }
+    },
+    // Empty state styles
+    emptyCompletedTaskCard: {
+        width: 240,
+        height: 180,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 12,
+        marginRight: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    emptyProjectCard: {
+        marginHorizontal: 20,
+        marginBottom: 15,
+        borderRadius: 12,
+        backgroundColor: '#f5f5f5',
+    },
+    emptyProjectCardContent: {
+        padding: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 180,
+    },
+    emptyStateText: {
+        fontSize: 16,
+        color: '#757575',
+        textAlign: 'center',
+        marginTop: 12,
+    },
+    createProjectButton: {
+        marginTop: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        backgroundColor: '#6c5ce7',
+        borderRadius: 8,
+    },
+    createProjectButtonText: {
+        color: '#ffffff',
+        fontWeight: '500',
+        fontSize: 14,
+    },
 });
 
 export default HomeScreen;
