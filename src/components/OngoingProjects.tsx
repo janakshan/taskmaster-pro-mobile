@@ -4,7 +4,12 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card, Avatar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 import { Project, useGetOngoingProjectsQuery } from 'src/store/slices/api/projectsApi';
+
+type NavigationProp = StackNavigationProp<RootStackParamList, 'Dashboard'>;
+
 interface OngoingProjectsProps {
     onSeeAllPress: () => void;
 }
@@ -16,7 +21,7 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ onSeeAllPress }) => {
         error
     } = useGetOngoingProjectsQuery();
 
-    const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
 
     // Render team members avatars with overlap effect
     const renderTeamMembers = (project: Project) => {
@@ -27,7 +32,7 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ onSeeAllPress }) => {
             <View style={styles.teamMembersContainer}>
                 {visibleMembers.map((member, index) => {
                     // Use owner avatar as fallback
-                    const avatarUrl = project.owner.avatar || 'https://randomuser.me/api/portraits/men/1.jpg';
+                    const avatarUrl = member.user?.avatar || project.owner.avatar || 'https://randomuser.me/api/portraits/men/1.jpg';
 
                     return (
                         <Avatar.Image
@@ -88,11 +93,10 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ onSeeAllPress }) => {
         console.log('Navigate to create project screen');
     };
 
-    // Handle project card press - navigate to project details
+    // Handle project card press - navigate to project details with projectId
     const handleProjectPress = (project: Project) => {
-        // Replace with your navigation implementation
-        // navigation.navigate('ProjectDetail', { projectId: project.id });
-        console.log('Navigate to project details:', project.id);
+        // Navigate to project detail screen with projectId
+        navigation.navigate('ProjectDetail', { projectId: project.id });
     };
 
     // Render loading state
@@ -150,7 +154,7 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ onSeeAllPress }) => {
                         onPress={() => handleProjectPress(project)}
                         activeOpacity={0.7}
                     >
-                        <Card style={styles.ongoingProjectCard}>
+                        <Card style={[styles.ongoingProjectCard, { backgroundColor: project.color || '#FFE6C9' }]}>
                             <Card.Content style={styles.projectCardContent}>
                                 <View style={styles.projectMainInfo}>
                                     <View>
@@ -230,7 +234,6 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         borderRadius: 12,
         elevation: 2,
-        backgroundColor: '#FFE6C9'
     },
     projectCardContent: {
         padding: 10,

@@ -117,7 +117,7 @@ const CompletedProjects: React.FC<CompletedProjectsProps> = ({ onSeeAllPress }) 
                         onPress={() => handleProjectPress(project)}
                         activeOpacity={0.7}
                     >
-                        <Card style={styles.completedProjectCard}>
+                        <Card style={[styles.completedProjectCard, { backgroundColor: project.color || '#5F33E1' }]}>
                             <Card.Content style={styles.cardContent}>
                                 <View style={styles.iconContainer}>
                                     <Icon name={project.icon || "check-circle"} size={20} color="#ffffff" />
@@ -167,7 +167,6 @@ const styles = StyleSheet.create({
         marginRight: 15,
         borderRadius: 12,
         elevation: 2,
-        backgroundColor: '#5F33E1'
     },
     cardContent: {
         padding: 15,

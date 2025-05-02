@@ -3,10 +3,15 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { API_URL } from 'src/config';
 import { RootState } from 'src/store';
 
-
 // Types
 export interface Member {
-    user: string;
+    user: {
+        _id: string;
+        name: string;
+        email: string;
+        avatar: string | null;
+        id: string;
+    };
     role: string;
     _id: string;
     joinedAt: string;
@@ -29,7 +34,7 @@ export interface Project {
     icon: string;
     startDate: string;
     endDate: string;
-    status: 'completed' | 'ongoing' | 'pending';
+    status: 'completed' | 'ongoing' | 'planning' | 'active' | 'on_hold' | 'pending';
     owner: Owner;
     members: Member[];
     isPrivate: boolean;
@@ -43,6 +48,11 @@ export interface ProjectsResponse {
     success: boolean;
     count: number;
     data: Project[];
+}
+
+export interface ProjectResponse {
+    success: boolean;
+    data: Project;
 }
 
 // Create API slice
@@ -86,6 +96,11 @@ export const projectsApi = createApi({
                     ]
                     : [{ type: 'Project', id: 'ONGOING_LIST' }],
         }),
+        getProjectById: builder.query<Project, string>({
+            query: (id) => `/projects/${id}`,
+            transformResponse: (response: ProjectResponse) => response.data,
+            providesTags: (result, error, id) => [{ type: 'Project', id }],
+        }),
     }),
 });
 
@@ -93,4 +108,5 @@ export const projectsApi = createApi({
 export const {
     useGetCompletedProjectsQuery,
     useGetOngoingProjectsQuery,
+    useGetProjectByIdQuery,
 } = projectsApi;

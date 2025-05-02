@@ -16,7 +16,7 @@ export type RootStackParamList = {
     Register: undefined;
     Dashboard: undefined;
     Profile: undefined;
-    ProjectDetail: { project: any }; // Replace 'any' with your Project type
+    ProjectDetail: { projectId: string }; // Updated to use projectId instead of project object
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
