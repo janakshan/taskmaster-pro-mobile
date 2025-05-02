@@ -8,6 +8,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import ProjectDetailScreen from '../screens/ProjectDetailsScreen';
 import ProfileScreen from 'src/screens/ProfileScreen';
+import CreateTaskScreen from '../screens/CreateTaskScreen'; // Import the new screen
 
 // Define the root stack parameter list type
 export type RootStackParamList = {
@@ -16,7 +17,8 @@ export type RootStackParamList = {
     Register: undefined;
     Dashboard: undefined;
     Profile: undefined;
-    ProjectDetail: { projectId: string }; // Updated to use projectId instead of project object
+    ProjectDetail: { projectId: string };
+    CreateTask: { projectId?: string }; // Add this new route
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -39,6 +41,7 @@ const AppNavigator: React.FC = () => {
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
             <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="CreateTask" component={CreateTaskScreen} />
 
             {/* Add other screens as you implement them */}
         </Stack.Navigator>
