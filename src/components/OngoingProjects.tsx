@@ -16,10 +16,12 @@ interface OngoingProjectsProps {
 
 const OngoingProjects: React.FC<OngoingProjectsProps> = ({ onSeeAllPress }) => {
     const {
-        data: projects = [],
+        data: allProjects = [],
         isLoading,
         error
     } = useGetOngoingProjectsQuery();
+
+    const projects = allProjects.slice(-2);
 
     const navigation = useNavigation<NavigationProp>();
 
@@ -168,7 +170,9 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ onSeeAllPress }) => {
                                             })}
                                         </Text>
                                     </View>
-                                    {renderProgressCircle(project)}
+                                    <View style={styles.iconContainer}>
+                                        <Icon name={project.icon || "folder"} size={24} color="#FFFFFF" />
+                                    </View>
                                 </View>
                             </Card.Content>
                         </Card>
@@ -344,6 +348,15 @@ const styles = StyleSheet.create({
     retryButtonText: {
         color: '#ffffff',
         fontWeight: '500',
+    },
+    iconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: 'rgba(76, 74, 74, 0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
     },
 });
 
