@@ -55,6 +55,18 @@ export interface TaskResponse {
     data: Task;
 }
 
+export interface CreateTaskRequest {
+    title: string;
+    description?: string;
+    status?: 'todo' | 'in_progress' | 'review' | 'completed';
+    priority?: 'low' | 'medium' | 'high';
+    dueDate?: string;
+    project: string;
+    category?: string;
+    tags?: string[];
+    parent?: string;
+}
+
 export interface UpdateTaskRequest {
     status?: 'todo' | 'in_progress' | 'review' | 'completed';
     title?: string;
@@ -83,6 +95,7 @@ export const tasksApi = createApi({
     }),
     tagTypes: ['Task', 'ProjectTasks'],
     endpoints: (builder) => ({
+        // Get tasks by project ID
         getTasksByProjectId: builder.query<Task[], string>({
             query: (projectId) => `/projects/${projectId}/tasks`,
             transformResponse: (response: TasksResponse) => response.data,
@@ -94,11 +107,13 @@ export const tasksApi = createApi({
                     ]
                     : [{ type: 'ProjectTasks', id: projectId }],
         }),
+        // Get task by ID
         getTaskById: builder.query<Task, string>({
             query: (id) => `/tasks/${id}`,
             transformResponse: (response: TaskResponse) => response.data,
             providesTags: (result, error, id) => [{ type: 'Task', id }],
         }),
+        // Update task
         updateTask: builder.mutation<Task, { taskId: string; data: UpdateTaskRequest }>({
             query: ({ taskId, data }) => ({
                 url: `/tasks/${taskId}`,
@@ -112,6 +127,19 @@ export const tasksApi = createApi({
                     { type: 'ProjectTasks', id: result?.project?._id }
                 ],
         }),
+        // Create new task
+        createTask: builder.mutation<TaskResponse, CreateTaskRequest>({
+            query: (taskData) => ({
+                url: '/tasks',
+                method: 'POST',
+                body: taskData,
+            }),
+            invalidatesTags: (result) =>
+                result?.success ? [
+                    { type: 'Task', id: result.data.id },
+                    { type: 'ProjectTasks', id: result.data.project._id }
+                ] : [],
+        }),
     }),
 });
 
@@ -120,4 +148,5 @@ export const {
     useGetTasksByProjectIdQuery,
     useGetTaskByIdQuery,
     useUpdateTaskMutation,
+    useCreateTaskMutation
 } = tasksApi;
