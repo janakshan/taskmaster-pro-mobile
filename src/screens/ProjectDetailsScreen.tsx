@@ -367,7 +367,6 @@ const ProjectDetailScreen = () => {
                             </Text>
                         )}
                     </View>
-                   // Replace the addSubtaskButton TouchableOpacity in ProjectDetailScreen
                     <TouchableOpacity
                         style={styles.addSubtaskButton}
                         onPress={() => navigation.navigate('CreateTask', { projectId: projectId })}
