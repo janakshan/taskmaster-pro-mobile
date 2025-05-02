@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, StatusBar, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { Avatar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -14,8 +14,16 @@ const CreateTaskScreen = ({ route }) => {
         { id: '1', name: 'Robert', avatar: 'https://randomuser.me/api/portraits/men/1.jpg' },
         { id: '2', name: 'Sophia', avatar: 'https://randomuser.me/api/portraits/women/1.jpg' }
     ]);
-    const [time, setTime] = useState('10:30 AM');
-    const [date, setDate] = useState('15/11/2022');
+    const [priority, setPriority] = useState('medium');
+    const [time, setTime] = useState(() => {
+        const now = new Date();
+        return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+    });
+
+    const [date, setDate] = useState(() => {
+        const now = new Date();
+        return now.toLocaleDateString('en-GB').split('/').join('/');
+    });
 
     const handleCreateTask = () => {
         // Here you would typically call your API to create the task
@@ -29,17 +37,31 @@ const CreateTaskScreen = ({ route }) => {
         setTeamMembers(teamMembers.filter(member => member.id !== id));
     };
 
+    const getPriorityColor = (level, isSelected) => {
+        if (!isSelected) return 'transparent';
+
+        switch (level) {
+            case 'low': return '#4dabf7';
+            case 'medium': return '#ffa94d';
+            case 'high': return '#ff6b6b';
+            case 'urgent': return '#e03131';
+            default: return '#6c5ce7';
+        }
+    };
+
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Icon name="arrow-left" size={24} color="#333" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Create New Task</Text>
-            </View>
+            <SafeAreaView style={styles.safeAreaView}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                        <Icon name="arrow-left" size={24} color="#333" />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Create New Task</Text>
+                </View>
+            </SafeAreaView>
 
             <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
                 {/* Task Title */}
@@ -77,6 +99,28 @@ const CreateTaskScreen = ({ route }) => {
                     <TouchableOpacity style={styles.addButton}>
                         <Icon name="plus" size={24} color="#fff" />
                     </TouchableOpacity>
+                </View>
+
+                <Text style={styles.label}>Priority</Text>
+                <View style={styles.priorityContainer}>
+                    {['low', 'medium', 'high', 'urgent'].map((level) => (
+                        <TouchableOpacity
+                            key={level}
+                            style={[
+                                styles.priorityButton,
+                                priority === level && styles.priorityButtonSelected,
+                                { backgroundColor: getPriorityColor(level, priority === level) }
+                            ]}
+                            onPress={() => setPriority(level)}
+                        >
+                            <Text style={[
+                                styles.priorityButtonText,
+                                priority === level && styles.priorityButtonTextSelected
+                            ]}>
+                                {level.charAt(0).toUpperCase() + level.slice(1)}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
                 </View>
 
                 {/* Time and Date */}
@@ -121,6 +165,9 @@ const CreateTaskScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+    safeAreaView: {
+        backgroundColor: '#ffffff',
+    },
     container: {
         flex: 1,
         backgroundColor: '#ffffff',
@@ -252,6 +299,33 @@ const styles = StyleSheet.create({
     createButtonText: {
         color: '#fff',
         fontSize: 18,
+        fontWeight: '600',
+    },
+    priorityContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 24,
+    },
+    priorityButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        flex: 1,
+        marginHorizontal: 4,
+        alignItems: 'center',
+    },
+    priorityButtonSelected: {
+        borderColor: 'transparent',
+    },
+    priorityButtonText: {
+        fontSize: 14,
+        color: '#333',
+        textTransform: 'capitalize',
+    },
+    priorityButtonTextSelected: {
+        color: '#fff',
         fontWeight: '600',
     },
 });
