@@ -1,31 +1,35 @@
-// API Configuration
-// export const API_URL = 'http://localhost:5000/api';
+// src/config/index.ts
+
+// API configuration
 export const API_URL = 'http://192.168.1.150:5000/api';
-
-// Feature flags
-export const FEATURES = {
-    ENABLE_OFFLINE_MODE: true,
-    ENABLE_PUSH_NOTIFICATIONS: true,
-    ENABLE_BIOMETRICS: true,
-};
-
-// Default app settings
-export const SETTINGS = {
-    THEME: 'light',
-    LANGUAGE: 'en',
-    NOTIFICATIONS_ENABLED: true,
-};
 
 // Storage keys
 export const STORAGE_KEYS = {
-    AUTH_PREFIX: 'taskmaster_auth_',
-    SETTINGS_PREFIX: 'taskmaster_settings_',
-    CACHED_DATA_PREFIX: 'taskmaster_cache_',
+    AUTH_PREFIX: '@ProjectApp_auth_',
+    SETTINGS_PREFIX: '@ProjectApp_settings_',
+    THEME_KEY: '@ProjectApp_theme',
 };
 
 // Error messages
 export const ERROR_MESSAGES = {
-    NETWORK_ERROR: 'Network error. Please check your connection and try again.',
-    AUTHENTICATION_FAILED: 'Authentication failed. Please try again.',
+    AUTHENTICATION_FAILED: 'Authentication failed. Please check your credentials and try again.',
+    AUTHENTICATION_REQUIRED: 'Authentication required. Please login to continue.',
+    NETWORK_ERROR: 'Network error. Please check your internet connection and try again.',
     GENERIC_ERROR: 'Something went wrong. Please try again later.',
+    DATA_FETCH_FAILED: 'Failed to fetch data. Please try again.',
+    SESSION_EXPIRED: 'Your session has expired. Please login again.',
+};
+
+// App defaults
+export const APP_DEFAULTS = {
+    PAGINATION_LIMIT: 10,
+    DEBOUNCE_DELAY: 500,
+    ANIMATION_DURATION: 300,
+};
+
+// Project status options
+export const PROJECT_STATUS = {
+    ONGOING: 'ongoing',
+    COMPLETED: 'completed',
+    PENDING: 'pending',
 };

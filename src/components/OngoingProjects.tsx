@@ -1,71 +1,47 @@
+// src/components/OngoingProjects.tsx
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card, Avatar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-
-// Types
-type TeamMember = {
-    id: number;
-    avatar: string;
-};
-
-type Task = {
-    id: number;
-    title: string;
-    completed: boolean;
-};
-
-type Project = {
-    id: number;
-    title: string;
-    teamMembers: TeamMember[];
-    dueDate: string;
-    progress: number;
-    description: string;
-    totalTasks: number;
-    completedTasks: number;
-    tasks: Task[];
-};
-
-// Define the navigation parameter list
-type RootStackParamList = {
-    Home: undefined;
-    ProjectDetail: { project: Project };
-    Profile: undefined;
-    CreateProject: undefined;
-};
-
-// Type for navigation prop
-type ProjectScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
-
+import { Project, useGetOngoingProjectsQuery } from 'src/store/slices/api/projectsApi';
 interface OngoingProjectsProps {
-    projects: Project[];
     onSeeAllPress: () => void;
 }
 
-const OngoingProjects: React.FC<OngoingProjectsProps> = ({ projects, onSeeAllPress }) => {
-    const navigation = useNavigation<ProjectScreenNavigationProp>();
+const OngoingProjects: React.FC<OngoingProjectsProps> = ({ onSeeAllPress }) => {
+    const {
+        data: projects = [],
+        isLoading,
+        error
+    } = useGetOngoingProjectsQuery();
+
+    const navigation = useNavigation();
 
     // Render team members avatars with overlap effect
-    const renderTeamMembers = (members: TeamMember[]) => {
-        const visibleMembers = members.slice(0, 4); // Show only first 4 members
-        const remainingCount = members.length - 4;
+    const renderTeamMembers = (project: Project) => {
+        const visibleMembers = project.members.slice(0, 4); // Show only first 4 members
+        const remainingCount = project.members.length - 4;
 
         return (
             <View style={styles.teamMembersContainer}>
-                {visibleMembers.map((member, index) => (
-                    <Avatar.Image
-                        key={member.id}
-                        source={{ uri: member.avatar }}
-                        size={30}
-                        style={[
-                            styles.memberAvatar,
-                            { marginLeft: index > 0 ? -12 : 0 },
-                        ]}
-                    />
-                ))}
+                {visibleMembers.map((member, index) => {
+                    // Use owner avatar as fallback
+                    const avatarUrl = project.owner.avatar || 'https://randomuser.me/api/portraits/men/1.jpg';
+
+                    return (
+                        <Avatar.Image
+                            key={member._id}
+                            source={{ uri: avatarUrl }}
+                            size={30}
+                            style={[
+                                styles.memberAvatar,
+                                { marginLeft: index > 0 ? -12 : 0 },
+                            ]}
+                        />
+                    );
+                })}
+
                 {remainingCount > 0 && (
                     <View style={styles.remainingMembersContainer}>
                         <Text style={styles.remainingMembersText}>+{remainingCount}</Text>
@@ -75,8 +51,11 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ projects, onSeeAllPre
         );
     };
 
-    // Render a progress circle for ongoing projects
-    const renderProgressCircle = (progress: number) => {
+    // Calculate and render progress circle for ongoing projects
+    const renderProgressCircle = (project: Project) => {
+        // Calculate progress based on completed tasks vs total tasks logic would go here
+        // For simplicity, using a fixed progress value (could be enhanced with task data)
+        const progress = 0.5; // 50% progress
         const percentage = Math.round(progress * 100);
         const circumference = 2 * Math.PI * 30; // Circle with radius 30
         const strokeDashoffset = circumference * (1 - progress);
@@ -111,8 +90,31 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ projects, onSeeAllPre
 
     // Handle project card press - navigate to project details
     const handleProjectPress = (project: Project) => {
-        navigation.navigate('ProjectDetail', { project });
+        // Replace with your navigation implementation
+        // navigation.navigate('ProjectDetail', { projectId: project.id });
+        console.log('Navigate to project details:', project.id);
     };
+
+    // Render loading state
+    if (isLoading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <Text>Loading ongoing projects...</Text>
+            </View>
+        );
+    }
+
+    // Render error state
+    if (error) {
+        return (
+            <View style={styles.errorContainer}>
+                <Text>Error loading projects. Please try again.</Text>
+                <TouchableOpacity style={styles.retryButton}>
+                    <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     // Render empty state for ongoing projects
     const renderEmptyOngoingProjects = () => (
@@ -152,14 +154,17 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ projects, onSeeAllPre
                             <Card.Content style={styles.projectCardContent}>
                                 <View style={styles.projectMainInfo}>
                                     <View>
-                                        <Text style={styles.projectTitle}>{project.title}</Text>
+                                        <Text style={styles.projectTitle}>{project.name}</Text>
                                         <Text style={styles.teamMembersLabel}>Team members</Text>
-                                        {renderTeamMembers(project.teamMembers)}
+                                        {renderTeamMembers(project)}
                                         <Text style={styles.dueDate}>
-                                            Due on : {project.dueDate}
+                                            Due on: {new Date(project.endDate).toLocaleDateString('en-US', {
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
                                         </Text>
                                     </View>
-                                    {renderProgressCircle(project.progress)}
+                                    {renderProgressCircle(project)}
                                 </View>
                             </Card.Content>
                         </Card>
@@ -224,8 +229,8 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         marginBottom: 15,
         borderRadius: 12,
-        backgroundColor: '#FFE6C9',
         elevation: 2,
+        backgroundColor: '#FFE6C9'
     },
     projectCardContent: {
         padding: 10,
@@ -317,6 +322,25 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         fontWeight: '500',
         fontSize: 14,
+    },
+    loadingContainer: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    errorContainer: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    retryButton: {
+        marginTop: 10,
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        backgroundColor: '#6c5ce7',
+        borderRadius: 8,
+    },
+    retryButtonText: {
+        color: '#ffffff',
+        fontWeight: '500',
     },
 });
 

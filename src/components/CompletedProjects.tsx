@@ -1,46 +1,54 @@
+// src/components/CompletedProjects.tsx
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Card, ProgressBar, Avatar } from 'react-native-paper';
+import { Card, Avatar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Feather';
-
-// Types
-type TeamMember = {
-    id: number;
-    avatar: string;
-};
-
-type CompletedTask = {
-    id: number;
-    title: string;
-    teamMembers: TeamMember[];
-    progress: number;
-    color: string;
-};
+import { useNavigation } from '@react-navigation/native';
+import { Project, useGetCompletedProjectsQuery } from 'src/store/slices/api/projectsApi';
 
 interface CompletedProjectsProps {
-    tasks: CompletedTask[];
     onSeeAllPress: () => void;
 }
 
-const CompletedProjects: React.FC<CompletedProjectsProps> = ({ tasks, onSeeAllPress }) => {
+const CompletedProjects: React.FC<CompletedProjectsProps> = ({ onSeeAllPress }) => {
+    const { data: allProjects = [], isLoading, error } = useGetCompletedProjectsQuery();
+    const navigation = useNavigation();
+
+    // Only show the last 5 projects
+    const projects = allProjects.slice(-5);
+
+    // Handle project press - navigate to details
+    const handleProjectPress = (project: Project) => {
+        // Type this properly when implementing navigation
+        // navigation.navigate('ProjectDetail', { project });
+        console.log('Navigate to project details:', project.id);
+    };
+
     // Render team members avatars with overlap effect
-    const renderTeamMembers = (members: TeamMember[]) => {
-        const visibleMembers = members.slice(0, 4); // Show only first 4 members
-        const remainingCount = members.length - 4;
+    const renderMembers = (project: Project) => {
+        const maxVisibleMembers = 3;
+        const visibleMembers = project.members.slice(0, maxVisibleMembers);
+        const remainingCount = project.members.length - maxVisibleMembers;
 
         return (
-            <View style={styles.teamMembersContainer}>
-                {visibleMembers.map((member, index) => (
-                    <Avatar.Image
-                        key={member.id}
-                        source={{ uri: member.avatar }}
-                        size={30}
-                        style={[
-                            styles.memberAvatar,
-                            { marginLeft: index > 0 ? -12 : 0 },
-                        ]}
-                    />
-                ))}
+            <View style={styles.membersContainer}>
+                {visibleMembers.map((member, index) => {
+                    // Use owner avatar as fallback
+                    const avatarUrl = project.owner.avatar || 'https://randomuser.me/api/portraits/men/1.jpg';
+
+                    return (
+                        <Avatar.Image
+                            key={member._id}
+                            source={{ uri: avatarUrl }}
+                            size={24}
+                            style={[
+                                styles.memberAvatar,
+                                { marginLeft: index > 0 ? -8 : 0 },
+                            ]}
+                        />
+                    );
+                })}
+
                 {remainingCount > 0 && (
                     <View style={styles.remainingMembersContainer}>
                         <Text style={styles.remainingMembersText}>+{remainingCount}</Text>
@@ -50,56 +58,82 @@ const CompletedProjects: React.FC<CompletedProjectsProps> = ({ tasks, onSeeAllPr
         );
     };
 
-    // Render empty state for completed tasks
-    const renderEmptyCompletedTasks = () => (
-        <View style={styles.emptyCompletedTaskCard}>
-            <Icon name="check-circle" size={40} color="#d0d0d0" />
-            <Text style={styles.emptyStateText}>No completed tasks yet</Text>
-        </View>
-    );
+    // Handle loading state
+    if (isLoading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <Text>Loading completed projects...</Text>
+            </View>
+        );
+    }
+
+    // Handle error state
+    if (error) {
+        return (
+            <View style={styles.errorContainer}>
+                <Text>Error loading projects. Please try again.</Text>
+                <TouchableOpacity style={styles.retryButton}>
+                    <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
+    // Handle empty state
+    if (projects.length === 0) {
+        return (
+            <>
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Completed Projects</Text>
+                    <TouchableOpacity onPress={onSeeAllPress}>
+                        <Text style={styles.seeAllText}>See all</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.emptyContainer}>
+                    <Icon name="check-circle" size={40} color="#d0d0d0" />
+                    <Text style={styles.emptyText}>No completed projects yet</Text>
+                </View>
+            </>
+        );
+    }
 
     return (
         <>
-            {/* Section Header */}
             <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Completed Tasks</Text>
+                <Text style={styles.sectionTitle}>Completed Projects</Text>
                 <TouchableOpacity onPress={onSeeAllPress}>
                     <Text style={styles.seeAllText}>See all</Text>
                 </TouchableOpacity>
             </View>
 
-            {/* Horizontal Scroll for Completed Tasks */}
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalScrollContent}
+                contentContainerStyle={styles.scrollContent}
             >
-                {tasks.length > 0 ? (
-                    tasks.map((task) => (
-                        <Card key={task.id} style={[styles.completedTaskCard, { backgroundColor: task.color }]}>
+                {projects.map((project) => (
+                    <TouchableOpacity
+                        key={project.id}
+                        onPress={() => handleProjectPress(project)}
+                        activeOpacity={0.7}
+                    >
+                        <Card style={styles.completedProjectCard}>
                             <Card.Content style={styles.cardContent}>
-                                <Text style={styles.completedTaskTitle}>{task.title}</Text>
-                                <View style={styles.taskInfoContainer}>
-                                    <Text style={styles.teamMembersLabel}>Team members</Text>
-                                    {renderTeamMembers(task.teamMembers)}
+                                <View style={styles.iconContainer}>
+                                    <Icon name={project.icon || "check-circle"} size={20} color="#ffffff" />
                                 </View>
-                                <View style={styles.completedContainer}>
-                                    <Text style={styles.completedText}>Completed</Text>
-                                    <Text style={styles.completedPercentage}>
-                                        {Math.round(task.progress * 100)}%
-                                    </Text>
+                                <Text style={styles.projectTitle}>{project.name}</Text>
+                                <Text style={styles.projectDescription} numberOfLines={2}>
+                                    {project.description}
+                                </Text>
+                                {renderMembers(project)}
+                                <View style={styles.completedBadge}>
+                                    <Text style={styles.completedText}>100%</Text>
                                 </View>
-                                <ProgressBar
-                                    progress={task.progress}
-                                    color="#ffffff"
-                                    style={styles.progressBar}
-                                />
                             </Card.Content>
                         </Card>
-                    ))
-                ) : (
-                    renderEmptyCompletedTasks()
-                )}
+                    </TouchableOpacity>
+                ))}
             </ScrollView>
         </>
     );
@@ -124,92 +158,110 @@ const styles = StyleSheet.create({
         color: '#6c5ce7',
         fontWeight: '500',
     },
-    horizontalScrollContent: {
+    scrollContent: {
         paddingLeft: 20,
         paddingRight: 10,
     },
-    completedTaskCard: {
-        width: 240,
-        borderRadius: 12,
+    completedProjectCard: {
+        width: 200,
         marginRight: 15,
-        elevation: 4,
+        borderRadius: 12,
+        elevation: 2,
+        backgroundColor: '#5F33E1'
     },
     cardContent: {
-        padding: 5,
+        padding: 15,
     },
-    completedTaskTitle: {
-        fontSize: 20,
+    iconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    projectTitle: {
+        fontSize: 18,
         fontWeight: 'bold',
         color: '#ffffff',
-        marginBottom: 15,
-    },
-    taskInfoContainer: {
-        marginBottom: 20,
-    },
-    teamMembersLabel: {
-        fontSize: 14,
-        color: '#333333',
         marginBottom: 8,
     },
-    teamMembersContainer: {
+    projectDescription: {
+        fontSize: 14,
+        color: 'rgba(255, 255, 255, 0.8)',
+        marginBottom: 15,
+    },
+    membersContainer: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     memberAvatar: {
-        borderWidth: 2,
+        borderWidth: 1.5,
         borderColor: '#ffffff',
     },
     remainingMembersContainer: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
         backgroundColor: 'rgba(255, 255, 255, 0.3)',
         justifyContent: 'center',
         alignItems: 'center',
-        marginLeft: -12,
-        borderWidth: 2,
+        marginLeft: -8,
+        borderWidth: 1.5,
         borderColor: '#ffffff',
     },
     remainingMembersText: {
+        fontSize: 10,
+        color: '#ffffff',
+        fontWeight: 'bold',
+    },
+    completedBadge: {
+        position: 'absolute',
+        top: 15,
+        right: 15,
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+        borderRadius: 15,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+    },
+    completedText: {
         fontSize: 12,
         color: '#ffffff',
         fontWeight: 'bold',
     },
-    completedContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    loadingContainer: {
+        padding: 20,
         alignItems: 'center',
-        marginBottom: 8,
     },
-    completedText: {
-        fontSize: 14,
+    errorContainer: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    retryButton: {
+        marginTop: 10,
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        backgroundColor: '#6c5ce7',
+        borderRadius: 8,
+    },
+    retryButtonText: {
         color: '#ffffff',
+        fontWeight: '500',
     },
-    completedPercentage: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#ffffff',
-    },
-    progressBar: {
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    },
-    emptyCompletedTaskCard: {
-        width: 240,
-        height: 180,
+    emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+        marginHorizontal: 20,
         backgroundColor: '#f5f5f5',
         borderRadius: 12,
-        marginRight: 15,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
+        marginBottom: 15,
     },
-    emptyStateText: {
+    emptyText: {
+        marginTop: 10,
         fontSize: 16,
         color: '#757575',
-        textAlign: 'center',
-        marginTop: 12,
     },
 });
 
