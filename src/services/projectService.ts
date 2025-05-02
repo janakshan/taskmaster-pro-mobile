@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { API_URL, ERROR_MESSAGES } from '../config';
 import { authService } from './authService';
-import type { Project } from '../store/api/projectsApi';
+import { Project } from 'src/store/slices/api/projectsApi';
 
 class ProjectService {
     /**
