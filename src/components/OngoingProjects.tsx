@@ -21,7 +21,7 @@ const OngoingProjects: React.FC<OngoingProjectsProps> = ({ onSeeAllPress }) => {
         error
     } = useGetOngoingProjectsQuery();
 
-    const projects = allProjects.slice(-2);
+    const projects = allProjects.slice(-3);
 
     const navigation = useNavigation<NavigationProp>();
 
